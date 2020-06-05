@@ -115,4 +115,8 @@ if (typeof window.navigator !== "undefined") {
         }
     };
 
+    peerConnection.onnegotiationneeded=e=>{
+        if (peerConnection.signalingState !== "stable") return;
+    }
+
 })();
