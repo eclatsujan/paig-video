@@ -19,6 +19,7 @@ if (typeof window.navigator !== "undefined") {
 }
 (function () {
     const socket = io('node-video-paig.herokuapp.com');
+    let isAlreadyCalling;
     socket.on("update-user-list", ({users}) => {
         updateUserList(users);
     });
