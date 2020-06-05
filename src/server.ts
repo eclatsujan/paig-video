@@ -9,7 +9,7 @@ export class Server {
     private io: SocketIOServer;
     private activeSockets: string[] = [];
 
-    private readonly DEFAULT_PORT = 5000;
+    private readonly DEFAULT_PORT = process.env.PORT||5000;
 
     constructor() {
         this.initialize();
