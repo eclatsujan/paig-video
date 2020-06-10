@@ -1,5 +1,14 @@
 const { RTCPeerConnection, RTCSessionDescription } = window;
-const peerConnection=new RTCPeerConnection();
+const peerConnection=new RTCPeerConnection({
+    'iceServers': [
+        {
+            'urls': 'stun:stun.l.google.com:19302'
+        },
+        {
+            urls: 'stun1.l.google.com:19302'
+        }
+    ]
+});
 
 if (typeof window.navigator !== "undefined") {
     // console.log(navigator.getUserMedia());
@@ -37,6 +46,7 @@ if (typeof window.navigator !== "undefined") {
             new RTCSessionDescription(data.offer)
         );
         const answer = await peerConnection.createAnswer();
+
         await peerConnection.setLocalDescription(new RTCSessionDescription(answer));
 
         socket.emit("make-answer", {
@@ -51,7 +61,7 @@ if (typeof window.navigator !== "undefined") {
         );
 
         if (!isAlreadyCalling) {
-            callUser(data.socket);
+            await callUser(data.socket);
             isAlreadyCalling = true;
         }
     });
