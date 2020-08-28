@@ -32,10 +32,12 @@ if (typeof window.navigator !== "undefined") {
         }
     );
 }
+
 (function () {
-    const socket = io('node-video-paig.herokuapp.com');
+    const socket = io();
     let isAlreadyCalling;
     socket.on("update-user-list", ({users}) => {
+        // console.log(users);
         updateUserList(users);
     });
 

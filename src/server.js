@@ -11,7 +11,7 @@ var path_1 = __importDefault(require("path"));
 var Server = (function () {
     function Server() {
         this.activeSockets = [];
-        this.DEFAULT_PORT = 5000;
+        this.DEFAULT_PORT = parseInt(process.env.PORT || '5000');
         this.app = express_1.default();
         this.httpServer = http_1.createServer({}, this.app);
         this.io = socket_io_1.default(this.httpServer);
@@ -34,6 +34,7 @@ var Server = (function () {
             var existingSocket = _this.activeSockets.find(function (existingSocket) { return existingSocket === socket.id; });
             if (!existingSocket) {
                 _this.activeSockets.push(socket.id);
+                console.log(_this.activeSockets);
                 socket.emit("update-user-list", {
                     users: _this.activeSockets.filter(function (existingSocket) { return existingSocket !== socket.id; })
                 });

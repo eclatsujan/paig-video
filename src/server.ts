@@ -16,7 +16,6 @@ export class Server {
         this.httpServer = createServer({},this.app);
         this.io = socketIO(this.httpServer);
         this.initialize();
-
         this.handleRoutes();
         this.handleSocketConnection();
     }
@@ -41,6 +40,7 @@ export class Server {
             if (!existingSocket) {
                 this.activeSockets.push(socket.id);
 
+                console.log(this.activeSockets);
                 socket.emit("update-user-list", {
                     users: this.activeSockets.filter(
                         existingSocket => existingSocket !== socket.id
