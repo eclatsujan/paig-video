@@ -3,7 +3,7 @@ const peerConnection=new RTCPeerConnection({
     iceServers: [{
         urls: "turn:13.237.145.223:3478",
         username: 'tonic',
-        password: 'tonic2022t'
+        credential: 'tonic2022t'
     }]
 });
 
