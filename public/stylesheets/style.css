@@ -6,3 +6,7 @@ body {
 a {
   color: #00B7FF;
 }
+
+video::-webkit-media-controls-start-playback-button {
+  display: none;
+}
