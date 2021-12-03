@@ -10,18 +10,17 @@ const peerConnection=new RTCPeerConnection({
 if (typeof window.navigator !== "undefined") {
     // console.log(navigator.getUserMedia());
     navigator.mediaDevices.getUserMedia(
-        {video: true, audio: true},
-        stream => {
-            const localVideo = document.getElementById("local-video");
-            if (localVideo) {
-                localVideo.srcObject = stream;
-            }
-            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-        },
-        error => {
-            console.warn(error.message);
+        {video: true, audio: true}
+    ).then((stream)=>{
+        console.log(stream);
+        const localVideo = document.getElementById("local-video");
+        if (localVideo) {
+            localVideo.srcObject = stream;
         }
-    );
+        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+    }).catch((error)=> {
+        console.warn(error.message);
+    });
 }
 
 (function () {
