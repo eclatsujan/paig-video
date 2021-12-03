@@ -9,7 +9,7 @@ const peerConnection=new RTCPeerConnection({
 
 if (typeof window.navigator !== "undefined") {
     // console.log(navigator.getUserMedia());
-    navigator.getUserMedia(
+    navigator.mediaDevices.getUserMedia(
         {video: true, audio: true},
         stream => {
             const localVideo = document.getElementById("local-video");
