@@ -1,19 +1,10 @@
 const { RTCPeerConnection, RTCSessionDescription } = window;
 const peerConnection=new RTCPeerConnection({
-    'iceServers': [
-        {
-            'urls': 'stun:stun.l.google.com:19302'
-        },
-        {
-            urls: 'stun:stun1.l.google.com:19302'
-        },
-        {
-            urls: 'stun:stun2.l.google.com:19302'
-        },
-        {
-            urls: 'stun:stun3.l.google.com:19302'
-        }
-    ]
+    iceServers: [{
+        urls: "13.237.145.223:3478",
+        username: 'tonic',
+        password: 'tonic2022t'
+    }]
 });
 
 if (typeof window.navigator !== "undefined") {
