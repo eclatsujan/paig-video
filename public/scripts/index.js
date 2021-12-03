@@ -1,7 +1,7 @@
 const { RTCPeerConnection, RTCSessionDescription } = window;
 const peerConnection=new RTCPeerConnection({
     iceServers: [{
-        urls: "13.237.145.223:3478",
+        urls: "turn:13.237.145.223:3478",
         username: 'tonic',
         password: 'tonic2022t'
     }]
