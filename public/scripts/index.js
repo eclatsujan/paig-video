@@ -24,7 +24,9 @@ if (typeof window.navigator !== "undefined") {
 }
 
 (function () {
-    const socket = io();
+    const socket = io({
+        allowEIO3: true
+    });
     let isAlreadyCalling;
     socket.on("update-user-list", ({users}) => {
         // console.log(users);
