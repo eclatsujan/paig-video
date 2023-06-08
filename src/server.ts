@@ -1,23 +1,34 @@
 import express, {Application} from "express";
-import {Server as SocketIOServer} from "socket.io";
+import socketIO, {Server as SocketIOServer, Socket} from "socket.io";
 import {createServer, Server as HTTPServer} from "http";
 import path from 'path';
-
+import cors from 'cors';
+import User from "./User";
+import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "./socket/socketData";
+import { SocketHandler } from "./socket/socketHandler";
 export class Server {
     private httpServer: HTTPServer;
     private app: Application;
     private io: SocketIOServer;
+    private DEFAULT_PORT = parseInt(process.env.PORT||'5000');
     private activeSockets: string[] = [];
-
-    private DEFAULT_PORT = parseInt(process.env.PORT||'9001');
+    private userInformation: User[]=[];
+    private socket:Socket|null=null;
 
     constructor() {
         this.app = express();
+        this.app.use(cors());
         this.httpServer = createServer({},this.app);
-        this.io = new SocketIOServer(this.httpServer);
+        this.io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.httpServer,{
+            // allowEIO3: true,
+            cors:{
+                origin:"http://localhost:3000",
+                methods:["*"]
+            }
+        });
+        // this.io.attachApp(this.app);
         this.initialize();
         this.handleRoutes();
-        this.handleSocketConnection();
     }
 
     private initialize(): void {
@@ -32,45 +43,93 @@ export class Server {
     }
 
     private handleSocketConnection(): void {
+        let sockethandler:SocketHandler|null=null;
         this.io.on("connection", socket => {
+            this.socket=socket;
             const existingSocket = this.activeSockets.find(
                 existingSocket => existingSocket === socket.id
             );
-
             if (!existingSocket) {
                 this.activeSockets.push(socket.id);
-
-                console.log(this.activeSockets);
-                socket.emit("update-user-list", {
-                    users: this.activeSockets.filter(
-                        existingSocket => existingSocket !== socket.id
-                    )
-                });
-
-                socket.broadcast.emit("update-user-list", {
-                    users: [socket.id]
-                });
+                this.sendUserInformation();
             }
-
-            socket.on("call-user", data => {
-                socket.to(data.to).emit("call-made", {
+            socket.on("user",(name:string)=>{
+                const existingSocket = this.userInformation.find(
+                    existingSocket => existingSocket.id === socket.id
+                );
+                if(!existingSocket){
+                    this.userInformation.push({
+                        id:socket.id,
+                        name
+                    });
+                } 
+                this.sendUserInformation();  
+            });
+            
+            socket.on("getUser",()=>{
+                this.sendUserInformation();  
+            });
+            
+            socket.on("callUser", data => {
+                socket.to(data.to).emit("callMade", {
                     offer: data.offer,
-                    socket: socket.id
+                    to: socket.id
                 });
             });
-
-            socket.on("make-answer", data => {
-                socket.to(data.to).emit("answer-made", {
-                    socket: socket.id,
+    
+            socket.on("makeAnswer", data => {
+                socket.to(data.to).emit("answerMade", {
+                    to: socket.id,
                     answer: data.answer
                 });
             });
-
+            
+            socket.on('getRooms',()=> {
+                this.sendRooms();
+            });
+            
+            socket.on("createRoom",(name)=>{
+                socket.join(name);
+                this.sendRooms();
+            });
+            
+            socket.on("joinRoom",data=>{
+               socket.join(data.room); 
+            });
+            
+            socket.on('disconnect', ()=> {
+                this.removeUser(socket.id);
+                this.sendUserInformation();
+            });
         });
+    }
+    
+    private removeUser(socketId:string){
+        this.userInformation=this.userInformation.filter(user=>{
+            return user.id!==socketId;
+        });
+    }
+    
+    private sendUserInformation(){
+        if(this.socket==null){
+            return;
+        }
+        this.socket.broadcast.emit("updateUserList", this.userInformation);
+    }
+    
+    private sendRooms(){
+        if(this.socket==null){
+            return;
+        }
+        let rooms=[...Array.from(this.io.of("/").adapter.rooms.keys())];
+        rooms=rooms.filter((r:string)=>{
+            return !this.activeSockets.includes(r);
+        });
+        console.log(rooms);
+        this.socket.broadcast.emit('rooms',rooms);
     }
 
     public listen(callback: (port: number) => void): void {
-
         this.httpServer.listen(this.DEFAULT_PORT,() =>
             callback(this.DEFAULT_PORT)
         );
